@@ -1,0 +1,96 @@
+.login-left{
+    display: flex;
+    gap: 10px;
+    width: 65%;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-left h2{
+    color: #EDA415;
+    font-size: 3rem;
+    text-align: center;
+    margin: 0;
+}
+
+.login-left input{
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.1rem;
+}
+
+.login-left .input-box{
+   background: #F4F8F5;
+   display: flex;
+   width: 400px;
+   padding: 15px;
+   gap: 5px;
+   border-radius: 6px;
+}
+
+.login-right{
+    display: flex;
+    width: 35%;
+    justify-content: center;
+    background: #003F62;
+    position: relative;
+    align-items: center;
+    background-image: url("../../assets/Background Images/signUpBg.png");
+}
+
+.login-right h2{
+    color: white;
+    font-size: 3rem;
+    text-align: center;
+    margin: 0;
+}
+
+.login-right .text{
+    font-size: 1.2rem;
+    text-align: center;
+    color: white;
+    margin-bottom: 55px;
+    margin-top: 5px;
+}
+
+.login-button{
+    background-color: #EDA415;
+    color: white;
+    border-radius: 40px;
+    padding: 20px;
+    font-size: 1.1rem;
+    width: 250px;
+    border: none;
+    cursor: pointer;
+}
+
+.login-button:hover{
+    background-color: #d39417;
+    color: white;
+}
+
+.signup-image{
+    position: absolute;
+    width: auto;
+    left: -40%;
+    height: 100%;
+}
+
+.login-switch-button{
+    background-color: transparent;
+    color: white;
+    border-radius: 40px;
+    padding: 20px;
+    font-size: 1.1rem;
+    width: 250px;
+    border: 1.5px solid white;
+    cursor: pointer;
+}
+
+.login-switch-button:hover{
+    background-color: white;
+    border: 1.5px solid #003F62;
+    color: #003F62;
+}
+

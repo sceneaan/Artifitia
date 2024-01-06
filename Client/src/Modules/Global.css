@@ -1,0 +1,24 @@
+.global-parent{
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+}
+.flex-row{
+    display: flex;
+    flex-direction: row;
+}
+.flex-column{
+    display: flex;
+    flex-direction: column;
+}
+.justify-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.justify-end{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
