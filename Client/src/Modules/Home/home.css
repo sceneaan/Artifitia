@@ -1,0 +1,73 @@
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.button {
+  background-color: orange;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 15px 20px;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+.button:hover {
+  background-color: #d39417;
+  color: white;
+}
+
+.product-container {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.add-button {
+  background-color: orange;
+  color: white;
+  font-size: medium;
+  border: none;
+  border-radius: 10px;
+  padding: 15px 20px;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+.add-button:hover {
+  background-color: #d39417;
+  color: white;
+}
+
+.discard-button {
+  background-color: #eeeeee;
+  color: black;
+  font-size: medium;
+  border: none;
+  border-radius: 10px;
+  padding: 15px 20px;
+  cursor: pointer;
+}
+
+.discard-button:hover {
+  background-color: #c8c8c8;
+  color: black;
+}
+
+.input-box {
+  background: #f4f8f5;
+  display: flex;
+  width: 400px;
+  padding: 15px;
+  gap: 5px;
+  border-radius: 6px;
+}
