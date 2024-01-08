@@ -10,6 +10,8 @@ import Select from "@mui/material/Select";
 import "../Home/home.css";
 import { listCategoryApi } from "../../api/categoryApi";
 import { addSubCategoryApi } from "../../api/subCategoryApi";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SubCategoryDialog() {
   const [open, setOpen] = useState(false);
@@ -58,9 +60,22 @@ export default function SubCategoryDialog() {
 
   const handleAddSubCategory = async () => {
     try {
-      await addSubCategoryApi(subCategory);
-      handleClose();
+      const response = await addSubCategoryApi(subCategory);
+
+      if (response.status === 200) {
+        toast.success(response.data.message, {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+        handleClose();
+      } else {
+        toast.error(response.data.message, {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+      }
     } catch (error) {
+      toast.error("Subcategory adding failed", {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
       console.log(error.message);
     }
   };

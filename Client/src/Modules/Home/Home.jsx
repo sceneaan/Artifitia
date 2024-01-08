@@ -1,94 +1,134 @@
-// Home.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TopBar from "../Topbar/Topbar";
 import SideBar from "../SideBar/SideBar";
 import AddCategoryDialog from "../Dialogs/AddCategoryDialog";
 import AddSubCategoryDialog from "../Dialogs/AddSubCatDialog";
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Button,
-  Grid,
-} from "@mui/material";
+import AddProductDialog from "../Dialogs/AddProductDialog";
+import { Card, CardContent, CardMedia, Typography, Grid } from "@mui/material";
 import Rating from "@mui/material/Rating";
 import Pagination from "@mui/material/Pagination";
 import "./home.css";
+import { listProductApi } from "../../api/productApi";
 
 const Home = () => {
   const token = localStorage.getItem("token");
   const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
   const [openSubCategoryDialog, setOpenSubCategoryDialog] = useState(false);
-
-  const handleOpenCategoryDialog = () => {
-    if (token) {
-      setOpenCategoryDialog(true);
-    } else {
-      console.log("User not authenticated. Handle accordingly.");
-    }
-  };
+  const [openProductDialog, setOpenProductDialog] = useState(false);
+  const [productList, setProductList] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedSubcategories, setSelectedSubcategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleCloseCategoryDialog = () => {
     setOpenCategoryDialog(false);
-  };
-
-  const handleOpenSubCategoryDialog = () => {
-    if (token) {
-      setOpenSubCategoryDialog(true);
-    } else {
-      console.log("User not authenticated. Handle accordingly.");
-    }
   };
 
   const handleCloseSubCategoryDialog = () => {
     setOpenSubCategoryDialog(false);
   };
 
-  // Example data for product list
-  const productList = [
-    { id: 1, name: "Product 1", price: 100, rating: 4.5 },
-    { id: 2, name: "Product 2", price: 120, rating: 4.2 },
-    { id: 3, name: "Product 3", price: 90, rating: 4.8 },
-    // Add more products as needed
-  ];
+  const handleProductDialog = () => {
+    setOpenProductDialog(false);
+  };
+
+  const handlePageChange = (event, page) => {
+    setCurrentPage(page);
+  };
+
+  const handleSubcategoryChange = (subcategoryId) => {
+    const updatedSelectedSubcategories = [...selectedSubcategories];
+    const index = updatedSelectedSubcategories.indexOf(subcategoryId);
+
+    if (index !== -1) {
+      updatedSelectedSubcategories.splice(index, 1);
+    } else {
+      updatedSelectedSubcategories.push(subcategoryId);
+    }
+
+    setSelectedSubcategories(updatedSelectedSubcategories);
+  };
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await listProductApi({
+          subCategoryList: selectedSubcategories,
+          index: currentPage - 1,
+          search: searchQuery,
+        });
+
+        if (response.status === 200) {
+          if (response.data.list.length === 0) {
+            console.log("Product list is empty");
+          } else {
+            setProductList(response.data.list);
+            setTotalPages(response.data.pages);
+          }
+        } else {
+          console.error("Error fetching product list:", response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching product list:", error.message);
+      }
+    };
+
+    fetchData();
+  }, [currentPage, selectedSubcategories, searchQuery]);
 
   return (
     <>
-      <TopBar />
+      <TopBar onSearch={handleSearch} />
       <div style={{ display: "flex" }}>
-        <SideBar />
+        <SideBar onSubcategoryChange={handleSubcategoryChange} />
         <div style={{ flex: 1, padding: "20px" }}>
           <div className="button-container">
             <AddCategoryDialog
               open={openCategoryDialog}
               handleClose={handleCloseCategoryDialog}
+              disabled={!token}
             />
             <AddSubCategoryDialog
               open={openSubCategoryDialog}
               handleClose={handleCloseSubCategoryDialog}
+              disabled={!token}
             />
-            <button className="button" disabled={!token}>
-              Add Product
-            </button>
+            <AddProductDialog
+              open={openProductDialog}
+              handleClose={handleProductDialog}
+              disabled={!token}
+            />
           </div>
           <div className="product-container">
             <Grid container spacing={3}>
               {productList.map((product) => (
-                <Grid item key={product.id} xs={12} sm={6} md={4}>
-                  <Card>
+                <Grid item key={product._id} xs={12} sm={6} md={4}>
+                  <Card className="card">
                     <CardMedia
                       component="img"
                       height="140"
-                      image="/path/to/product-image.jpg"
-                      alt={product.name}
+                      image={
+                        product.images.length > 0
+                          ? product.images[0].url
+                          : "/path/to/default-image.jpg"
+                      }
+                      alt={product.productName}
                     />
-                    <CardContent>
-                      <Typography variant="h5" component="div">
-                        {product.name}
+                    <CardContent className="card-content">
+                      <Typography
+                        variant="h5"
+                        component="div"
+                        style={{ fontSize: "medium" }}
+                      >
+                        {product.productName}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        <b> ${product.price}</b>
+                        <b>${product.variants[0].price}</b>
                       </Typography>
                       <Rating
                         name="read-only"
@@ -102,7 +142,13 @@ const Home = () => {
             </Grid>
 
             <div className="pagination-container">
-              <Pagination count={10} color="primary" className="pagination" />
+              <Pagination
+                count={totalPages}
+                color="primary"
+                page={currentPage}
+                onChange={handlePageChange}
+                className="pagination"
+              />
             </div>
           </div>
         </div>

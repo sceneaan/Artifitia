@@ -7,6 +7,8 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import "../Home/home.css";
 import { addCategoryApi } from "../../api/categoryApi";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function CategoryDialog() {
   const [open, setOpen] = useState(false);
@@ -24,9 +26,22 @@ export default function CategoryDialog() {
 
   const handleAddCategory = async () => {
     try {
-      await addCategoryApi(category);
-      handleClose();
+      const response = await addCategoryApi(category);
+
+      if (response.status === 200) {
+        toast.success(response.data.message, {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+        handleClose();
+      } else {
+        toast.error(response.data.message, {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+      }
     } catch (error) {
+      toast.error("Category adding failed", {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
       console.log(error.message);
     }
   };
