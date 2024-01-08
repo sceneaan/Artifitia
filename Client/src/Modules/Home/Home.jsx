@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; // Import Link
+import { Link } from "react-router-dom";
 import TopBar from "../Topbar/Topbar";
 import SideBar from "../SideBar/SideBar";
 import AddCategoryDialog from "../Dialogs/AddCategoryDialog";
@@ -8,11 +8,12 @@ import AddProductDialog from "../Dialogs/AddProductDialog";
 import { Card, CardContent, CardMedia, Typography, Grid } from "@mui/material";
 import Rating from "@mui/material/Rating";
 import Pagination from "@mui/material/Pagination";
+import CircularProgress from "@mui/material/CircularProgress";
 import "./home.css";
 import { listProductApi } from "../../api/productApi";
 
 const Home = () => {
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
   const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
   const [openSubCategoryDialog, setOpenSubCategoryDialog] = useState(false);
   const [openProductDialog, setOpenProductDialog] = useState(false);
@@ -21,6 +22,7 @@ const Home = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedSubcategories, setSelectedSubcategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const handleCloseCategoryDialog = () => {
     setOpenCategoryDialog(false);
@@ -57,6 +59,7 @@ const Home = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await listProductApi({
           subCategoryList: selectedSubcategories,
@@ -76,6 +79,8 @@ const Home = () => {
         }
       } catch (error) {
         console.error("Error fetching product list:", error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -106,56 +111,64 @@ const Home = () => {
             />
           </div>
           <div className="product-container">
-            <Grid container spacing={3}>
-              {productList.map((product) => (
-                <Grid item key={product._id} xs={12} sm={6} md={4}>
-                  <Link
-                    to={`/product/${product._id}`}
-                    style={{ textDecoration: "none" }}
-                  >
-                    <Card className="card">
-                      <CardMedia
-                        component="img"
-                        height="140"
-                        image={
-                          product.images.length > 0
-                            ? product.images
-                            : "/path/to/default-image.jpg"
-                        }
-                        alt={product.productName}
-                      />
-                      <CardContent className="card-content">
-                        <Typography
-                          variant="h5"
-                          component="div"
-                          style={{ fontSize: "medium" }}
-                        >
-                          {product.productName}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          <b>${product.variants[0].price}</b>
-                        </Typography>
-                        <Rating
-                          name="read-only"
-                          value={product.rating}
-                          readOnly
-                        />
-                      </CardContent>
-                    </Card>
-                  </Link>
+            {loading ? (
+              <div className="loader-container">
+                <CircularProgress />
+              </div>
+            ) : (
+              <>
+                <Grid container spacing={3}>
+                  {productList.map((product) => (
+                    <Grid item key={product._id} xs={12} sm={6} md={4}>
+                      <Link
+                        to={`/product/${product._id}`}
+                        style={{ textDecoration: "none" }}
+                      >
+                        <Card className="card">
+                          <CardMedia
+                            component="img"
+                            style={{ height: "100%" }}
+                            image={
+                              product.images.length > 0
+                                ? product.images
+                                : "/path/to/default-image.jpg"
+                            }
+                            alt={product.productName}
+                          />
+                          <CardContent className="card-content">
+                            <Typography
+                              variant="h5"
+                              component="div"
+                              style={{ fontSize: "medium" }}
+                            >
+                              {product.productName}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              <b>${product.variants[0].price}</b>
+                            </Typography>
+                            <Rating
+                              name="read-only"
+                              value={product.rating}
+                              readOnly
+                            />
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    </Grid>
+                  ))}
                 </Grid>
-              ))}
-            </Grid>
 
-            <div className="pagination-container">
-              <Pagination
-                count={totalPages}
-                color="primary"
-                page={currentPage}
-                onChange={handlePageChange}
-                className="pagination"
-              />
-            </div>
+                <div className="pagination-container">
+                  <Pagination
+                    count={totalPages}
+                    color="primary"
+                    page={currentPage}
+                    onChange={handlePageChange}
+                    className="pagination"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

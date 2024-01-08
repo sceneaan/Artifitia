@@ -2,7 +2,6 @@ import React from "react";
 import WishListCard from "./WishListCard";
 
 const WishListDrawer = () => {
-  // Dummy wishListData array with product details
   const wishListData = [
     {
       productId: "1",

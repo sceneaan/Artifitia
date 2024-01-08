@@ -18,7 +18,7 @@ export const signUpApi = async (body) => {
     if (response.status === 200) {
       console.log(response.data);
     }
-    return response
+    return response;
   } catch (error) {
     console.log(error.message);
   }
@@ -33,6 +33,7 @@ export const signInApi = async (body) => {
 
       store.dispatch(setUserCred(response.data));
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("adminId", response.data.adminId);
     }
   } catch (error) {
     console.log(error.message);

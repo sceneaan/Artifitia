@@ -14,6 +14,7 @@ import { listSubCategoryApi } from "../../api/subCategoryApi";
 import { addProductApi } from "../../api/productApi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 
 export default function ProductDialog() {
   const [open, setOpen] = useState(false);
@@ -33,12 +34,11 @@ export default function ProductDialog() {
   const handleImageChange = (event) => {
     const selectedImages = Array.from(event.target.files).slice(0, 3);
 
-    // Update state to include new images with unique identifiers
     setImages((prevImages) => [
       ...prevImages,
       ...selectedImages.map((image, index) => ({
         file: image,
-        id: index + Date.now(), // Unique identifier
+        id: index + Date.now(),
       })),
     ]);
   };
@@ -74,8 +74,6 @@ export default function ProductDialog() {
     event.stopPropagation();
     handleRemove(index);
   };
-
-  // const formData = new FormData();
 
   useEffect(() => {
     const fetchSubCategories = async () => {
@@ -149,10 +147,6 @@ export default function ProductDialog() {
       formData.append("description", product.description);
       formData.append("variants", JSON.stringify(product.variants));
 
-      // images.forEach((image, index) => {
-      //   formData.append(`images[${index}][file]`, image.file);
-      // });
-      console.log(selectedFiles);
       selectedFiles.forEach((file, index) => {
         if (file !== null) {
           formData.append("images", file);
@@ -162,14 +156,12 @@ export default function ProductDialog() {
       const response = await addProductApi(formData);
 
       if (response.status === 200) {
-        // setImageUrls(response.data.images);
-
         toast.success(response.data.message, {
           position: toast.POSITION.BOTTOM_CENTER,
         });
         handleClose();
       } else {
-        toast.error(response.data.message || "Product adding failed", {
+        toast.error(response.data.message || "Failed to add product", {
           position: toast.POSITION.BOTTOM_CENTER,
         });
       }
@@ -315,7 +307,9 @@ export default function ProductDialog() {
                 }
               />
             </div>
+
             <div style={{ display: "flex", gap: "20px" }}>
+              <div style={{ marginRight: "20px" }}>Upload Images :</div>
               {[0, 1, 2].map((index) => (
                 <div
                   key={index}
@@ -339,7 +333,18 @@ export default function ProductDialog() {
                     ref={(input) => (fileInputs.current[index] = input)}
                   />
 
-                  {selectedFiles[index] === null && <p>Upload</p>}
+                  {selectedFiles[index] === null && (
+                    <p>
+                      <AddPhotoAlternateOutlinedIcon
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "30px",
+                        }}
+                      />
+                    </p>
+                  )}
                   {selectedFiles[index] && (
                     <div style={{ position: "relative" }}>
                       {" "}
@@ -359,61 +364,30 @@ export default function ProductDialog() {
                 </div>
               ))}
             </div>
-            {/* <div style={{ marginBottom: "15px", width: "100%" }}>
-              Upload images:
-              <input
-                style={{ marginLeft: "40px" }}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-              />
-            </div> */}
-            {/* <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                marginBottom: "15px",
-                justifyContent: "center",
-              }}
-            >
-              {images &&
-                images.map((image) => (
-                  <div
-                    key={image.id}
-                    style={{ position: "relative", marginRight: "10px" }}
-                  >
-                    <img
-                      src={URL.createObjectURL(image.file)}
-                      alt={`Selected ${image.id}`}
-                      style={{
-                        width: "100px",
-                        height: "auto",
-                      }}
-                    />
-                    <button
-                      style={{
-                        position: "absolute",
-                        top: "5px",
-                        right: "5px",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handleRemoveImage(image.id)}
-                    >
-                      &#x2715;
-                    </button>
-                  </div>
-                ))}
-            </div> */}
           </DialogContentText>
         </DialogContent>
         <DialogActions style={{ alignSelf: "center", marginBottom: "15px" }}>
-          <Button className="add-button" onClick={handleAddProduct}>
+          <Button
+            variant="contained"
+            style={{
+              marginRight: "10px",
+              backgroundColor: "#EDA415",
+              borderRadius: "20px",
+            }}
+            onClick={handleAddProduct}
+          >
             ADD
           </Button>
-          <Button className="discard-button" onClick={handleClose} autoFocus>
+          <Button
+            variant="contained"
+            color="warning"
+            style={{
+              marginRight: "10px",
+              borderRadius: "20px",
+            }}
+            onClick={handleClose}
+            autoFocus
+          >
             DISCARD
           </Button>
         </DialogActions>
