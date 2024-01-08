@@ -5,6 +5,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const subcategoryRoutes = require("./routes/subCategoryRoutes");
 const productRoutes = require("./routes/productRoutes");
+const wishlistRoutes = require("./routes/wishListRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -16,6 +17,7 @@ app.use("/admin", adminRoutes);
 app.use("/category", categoryRoutes);
 app.use("/subcategory", subcategoryRoutes);
 app.use("/product", productRoutes);
+app.use("/wishlist", wishlistRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URL, {
