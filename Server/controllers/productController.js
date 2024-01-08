@@ -1,18 +1,21 @@
-const { ProductCategory } = require("../models/productModel");
-const { uploadImages } = require("../middleware/ImageMiddleware");
+const { Product } = require("../models/productModel");
 
 async function addProduct(req, res) {
   try {
     const { productName, subCategoryId, description, variants, rating } =
       req.body;
 
-    const newProduct = new ProductCategory({
+    const images = req.files
+      ? req.files.map((file) => ({ url: file.path }))
+      : [];
+
+    const newProduct = new Product({
       productName,
       subCategoryId,
       description,
-      variants,
+      variants: JSON.parse(variants),
       rating,
-      images: req.files.map((file) => ({ url: file.path })),
+      images: req.files?.map((file) => ({ url: file.path })) || [],
     });
 
     await newProduct.save();
@@ -35,7 +38,7 @@ async function editProduct(req, res) {
       rating,
     } = req.body;
 
-    const existingProduct = await ProductCategory.findById(productId);
+    const existingProduct = await Product.findById(productId);
 
     if (!existingProduct) {
       return res.status(404).json({ message: "Product not found" });
@@ -46,7 +49,15 @@ async function editProduct(req, res) {
       subCategoryId || existingProduct.subCategoryId;
     existingProduct.description = description || existingProduct.description;
     existingProduct.variants = variants || existingProduct.variants;
-    existingProduct.rating = rating || existingProduct.rating;
+
+    if (rating !== undefined) {
+      existingProduct.rating.push(rating);
+
+      const totalRating = existingProduct.rating.reduce((sum, r) => sum + r, 0);
+      const averageRating = totalRating / existingProduct.rating.length;
+
+      existingProduct.rating = averageRating;
+    }
 
     await existingProduct.save();
 
@@ -61,7 +72,7 @@ async function deleteProduct(req, res) {
   try {
     const { productId } = req.params;
 
-    const deletedProduct = await ProductCategory.findByIdAndDelete(productId);
+    const deletedProduct = await Product.findByIdAndDelete(productId);
 
     if (!deletedProduct) {
       return res.status(404).json({ message: "Product not found" });
@@ -78,7 +89,7 @@ async function deleteImageFromProduct(req, res) {
   try {
     const { productId, imageId } = req.params;
 
-    const existingProduct = await ProductCategory.findById(productId);
+    const existingProduct = await Product.findById(productId);
 
     if (!existingProduct) {
       return res.status(404).json({ message: "Product not found" });
@@ -105,7 +116,7 @@ async function listProducts(req, res) {
 
     let index = 0;
     if (req.body.index != undefined) {
-      index = parseInt(req.body.index) * 20;
+      index = parseInt(req.body.index) * 6;
     }
 
     if (
@@ -115,8 +126,16 @@ async function listProducts(req, res) {
       filter.subCategoryId = { $in: req.body.subCategoryList };
     }
 
-    const products = await ProductCategory.find(filter);
-    if (!products.length > 0) {
+    const products = await Product.find(filter);
+    if (products.length > 0) {
+      for (let i = 0; i < products.length; i++) {
+        const element = products[i];
+        if (Array.isArray(element.images) && element.images.length > 0) {
+          element._doc[
+            "images"
+          ] = `${process.env.FILEURL}${element.images[0].url}`;
+        }
+      }
       let response;
       if (req.body.search) {
         const searchValue = req.body.search.toLowerCase();
@@ -131,9 +150,9 @@ async function listProducts(req, res) {
           });
         });
         const totalRecords = filteredproducts.length;
-        const totalPages = Math.ceil(totalRecords / 20);
+        const totalPages = Math.ceil(totalRecords / 6);
         const startIndex = index;
-        const endIndex = startIndex + 20;
+        const endIndex = startIndex + 6;
         const paginatedEntries = filteredproducts.slice(startIndex, endIndex);
 
         if (!paginatedEntries.length > 0) {
@@ -153,27 +172,50 @@ async function listProducts(req, res) {
         }
       } else {
         const totalRecords = products.length;
-        const totalPages = Math.ceil(totalRecords / 20);
+        const totalPages = Math.ceil(totalRecords / 6);
         const startIndex = index;
-        const endIndex = startIndex + 20;
+        const endIndex = startIndex + 6;
         const paginatedEntries = products.slice(startIndex, endIndex);
         if (!paginatedEntries.length > 0) {
-          return { data: "Products not found", status: 400 };
+          response = {
+            data: "Products not found",
+            status: 400,
+          };
+        } else {
+          let nonSearchedDatas = {
+            list: paginatedEntries,
+            pages: totalPages,
+          };
+          response = {
+            data: nonSearchedDatas,
+            status: 200,
+          };
         }
-
-        let nonSearchedDatas = {
-          list: paginatedEntries,
-          pages: totalPages,
-        };
-        response = {
-          data: nonSearchedDatas,
-          status: 200,
-        };
       }
-      return response;
+      res.status(response.status).json(response.data);
     } else {
       res.status(500).json({ message: "Product list is empty" });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+async function getProductById(req, res) {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    for (let i = 0; i < product.images.length; i++) {
+      const element = product.images[i];
+      element.url = `${process.env.FILEURL}${element.url}`;
+    }
+    res.status(200).json({ data: product });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -186,4 +228,5 @@ module.exports = {
   deleteProduct,
   deleteImageFromProduct,
   listProducts,
+  getProductById,
 };

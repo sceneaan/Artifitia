@@ -3,7 +3,6 @@ const Category = require("../models/categoryModel");
 
 async function addSubCategory(req, res) {
   const { subCategoryName, categoryId } = req.body;
-
   try {
     if (!subCategoryName || subCategoryName === "") {
       return res.status(400).json({ message: "Subcategory name not entered" });

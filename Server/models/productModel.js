@@ -10,15 +10,13 @@ const productSchema = new mongoose.Schema({
   description: { type: String, required: true },
   variants: [
     {
-      ram: { type: String, required: true },
-      price: {
-        value: { type: Number, required: true },
-        symbol: { type: String, default: "$" },
-      },
+      spec: { name: { type: String }, value: { type: String } },
       quantity: { type: Number, required: true },
+      price: { type: Number, required: true },
+      symbol: { type: String, default: "$" },
     },
   ],
-  images: { type: [imageSchema], required: true },
+  images: { type: [imageSchema] },
   rating: { type: Number, min: 0, max: 5, default: 0 },
 });
 
