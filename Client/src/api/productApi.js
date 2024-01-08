@@ -14,9 +14,17 @@ const HEADER = {
 //add product
 export const addProductApi = async (body) => {
   try {
-    const response = await axios.post("/product/addproduct", body, {
-      headers: HEADER,
-    });
+    const response = await axios.post(
+      "/product/addproduct",
+      body,
+
+      {
+        headers: {
+          ...HEADER,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     if (response.status === 200) {
       console.log(response.data);
     }
@@ -32,6 +40,19 @@ export const listProductApi = async (body) => {
     const response = await axios.post("/product/listproducts", body);
     if (response.status === 200) {
       store.dispatch(setProducts(response.data));
+    }
+    return response;
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+//product single view
+export const getSingleProductApi = async (productId) => {
+  try {
+    const response = await axios.get(`/product/getproduct/${productId}`);
+    if (response.status === 200) {
+      console.log(response.data);
     }
     return response;
   } catch (error) {

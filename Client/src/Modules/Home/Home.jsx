@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom"; // Import Link
 import TopBar from "../Topbar/Topbar";
 import SideBar from "../SideBar/SideBar";
 import AddCategoryDialog from "../Dialogs/AddCategoryDialog";
@@ -108,35 +109,40 @@ const Home = () => {
             <Grid container spacing={3}>
               {productList.map((product) => (
                 <Grid item key={product._id} xs={12} sm={6} md={4}>
-                  <Card className="card">
-                    <CardMedia
-                      component="img"
-                      height="140"
-                      image={
-                        product.images.length > 0
-                          ? product.images[0].url
-                          : "/path/to/default-image.jpg"
-                      }
-                      alt={product.productName}
-                    />
-                    <CardContent className="card-content">
-                      <Typography
-                        variant="h5"
-                        component="div"
-                        style={{ fontSize: "medium" }}
-                      >
-                        {product.productName}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        <b>${product.variants[0].price}</b>
-                      </Typography>
-                      <Rating
-                        name="read-only"
-                        value={product.rating}
-                        readOnly
+                  <Link
+                    to={`/product/${product._id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <Card className="card">
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image={
+                          product.images.length > 0
+                            ? product.images
+                            : "/path/to/default-image.jpg"
+                        }
+                        alt={product.productName}
                       />
-                    </CardContent>
-                  </Card>
+                      <CardContent className="card-content">
+                        <Typography
+                          variant="h5"
+                          component="div"
+                          style={{ fontSize: "medium" }}
+                        >
+                          {product.productName}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <b>${product.variants[0].price}</b>
+                        </Typography>
+                        <Rating
+                          name="read-only"
+                          value={product.rating}
+                          readOnly
+                        />
+                      </CardContent>
+                    </Card>
+                  </Link>
                 </Grid>
               ))}
             </Grid>

@@ -45,8 +45,21 @@ export default function SideBar({ onSubcategoryChange }) {
   };
 
   const handleSubcategoryChange = (subcategoryId) => {
+    const updatedSelectedSubcategories = [...selectedSubcategories];
+    const index = updatedSelectedSubcategories.indexOf(subcategoryId);
+
+    if (index !== -1) {
+      // Subcategory is already selected, remove it
+      updatedSelectedSubcategories.splice(index, 1);
+    } else {
+      // Subcategory is not selected, add it
+      updatedSelectedSubcategories.push(subcategoryId);
+    }
+
+    setSelectedSubcategories(updatedSelectedSubcategories);
     onSubcategoryChange(subcategoryId);
   };
+  console.log(selectedSubcategories);
 
   return (
     <div

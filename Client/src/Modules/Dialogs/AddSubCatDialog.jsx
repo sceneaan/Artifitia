@@ -10,7 +10,7 @@ import Select from "@mui/material/Select";
 import "../Home/home.css";
 import { listCategoryApi } from "../../api/categoryApi";
 import { addSubCategoryApi } from "../../api/subCategoryApi";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function SubCategoryDialog() {
@@ -138,6 +138,7 @@ export default function SubCategoryDialog() {
           </button>
         </DialogActions>
       </Dialog>
+      <ToastContainer />
     </React.Fragment>
   );
 }

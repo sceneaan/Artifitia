@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -12,7 +12,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { listSubCategoryApi } from "../../api/subCategoryApi";
 import { addProductApi } from "../../api/productApi";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function ProductDialog() {
@@ -26,12 +26,56 @@ export default function ProductDialog() {
   const [images, setImages] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
 
+  const handleRemoveImage = (id) => {
+    setImages((prevImages) => prevImages.filter((image) => image.id !== id));
+  };
+
   const handleImageChange = (event) => {
-    const selectedImages = Array.from(event.target.files);
-    setImages(selectedImages);
+    const selectedImages = Array.from(event.target.files).slice(0, 3);
+
+    // Update state to include new images with unique identifiers
+    setImages((prevImages) => [
+      ...prevImages,
+      ...selectedImages.map((image, index) => ({
+        file: image,
+        id: index + Date.now(), // Unique identifier
+      })),
+    ]);
   };
 
   const [subCategory, setSubCategory] = useState([]);
+
+  const [selectedFiles, setSelectedFiles] = useState([null, null, null]);
+
+  const fileInputs = useRef([]);
+
+  const handleFileChange = (event, index) => {
+    const file = event.target.files[0];
+    setSelectedFiles((prevSelectedFiles) => {
+      const newSelectedFiles = [...prevSelectedFiles];
+      newSelectedFiles[index] = file;
+      return newSelectedFiles;
+    });
+  };
+
+  const handleRemove = (index) => {
+    setSelectedFiles((prevSelectedFiles) => {
+      const newSelectedFiles = [...prevSelectedFiles];
+      newSelectedFiles[index] = null;
+      return newSelectedFiles;
+    });
+  };
+
+  const handleDivClick = (index) => {
+    fileInputs.current[index].click();
+  };
+
+  const handleRemoveClick = (event, index) => {
+    event.stopPropagation();
+    handleRemove(index);
+  };
+
+  // const formData = new FormData();
 
   useEffect(() => {
     const fetchSubCategories = async () => {
@@ -105,14 +149,20 @@ export default function ProductDialog() {
       formData.append("description", product.description);
       formData.append("variants", JSON.stringify(product.variants));
 
-      images.forEach((image, index) => {
-        formData.append("images[]", image);
+      // images.forEach((image, index) => {
+      //   formData.append(`images[${index}][file]`, image.file);
+      // });
+      console.log(selectedFiles);
+      selectedFiles.forEach((file, index) => {
+        if (file !== null) {
+          formData.append("images", file);
+        }
       });
 
       const response = await addProductApi(formData);
 
       if (response.status === 200) {
-        setImageUrls(response.data.images);
+        // setImageUrls(response.data.images);
 
         toast.success(response.data.message, {
           position: toast.POSITION.BOTTOM_CENTER,
@@ -265,7 +315,51 @@ export default function ProductDialog() {
                 }
               />
             </div>
-            <div style={{ marginBottom: "15px", width: "100%" }}>
+            <div style={{ display: "flex", gap: "20px" }}>
+              {[0, 1, 2].map((index) => (
+                <div
+                  key={index}
+                  style={{
+                    border: "2px dashed #ddd",
+                    padding: "5px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    minWidth: "120px",
+                    minHeight: "120px",
+                  }}
+                  onClick={() => handleDivClick(index)}
+                >
+                  <input
+                    type="file"
+                    id={`fileInput${index}`}
+                    onChange={(event) => handleFileChange(event, index)}
+                    style={{ display: "none" }}
+                    ref={(input) => (fileInputs.current[index] = input)}
+                  />
+
+                  {selectedFiles[index] === null && <p>Upload</p>}
+                  {selectedFiles[index] && (
+                    <div style={{ position: "relative" }}>
+                      {" "}
+                      <button
+                        style={{ position: "absolute", right: "0", top: "0" }}
+                        onClick={(event) => handleRemoveClick(event, index)}
+                      >
+                        X
+                      </button>
+                      <img
+                        src={URL.createObjectURL(selectedFiles[index])}
+                        alt={`File ${index + 1} Preview`}
+                        style={{ width: "120px", height: "120px" }}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {/* <div style={{ marginBottom: "15px", width: "100%" }}>
               Upload images:
               <input
                 style={{ marginLeft: "40px" }}
@@ -274,22 +368,45 @@ export default function ProductDialog() {
                 multiple
                 onChange={handleImageChange}
               />
-            </div>
-            <div style={{ display: "flex", marginBottom: "15px" }}>
-              {imageUrls &&
-                imageUrls.map((imageUrl, index) => (
-                  <img
-                    key={index}
-                    src={imageUrl}
-                    alt={`Uploaded ${index}`}
-                    style={{
-                      width: "100px",
-                      height: "auto",
-                      marginRight: "10px",
-                    }}
-                  />
+            </div> */}
+            {/* <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                marginBottom: "15px",
+                justifyContent: "center",
+              }}
+            >
+              {images &&
+                images.map((image) => (
+                  <div
+                    key={image.id}
+                    style={{ position: "relative", marginRight: "10px" }}
+                  >
+                    <img
+                      src={URL.createObjectURL(image.file)}
+                      alt={`Selected ${image.id}`}
+                      style={{
+                        width: "100px",
+                        height: "auto",
+                      }}
+                    />
+                    <button
+                      style={{
+                        position: "absolute",
+                        top: "5px",
+                        right: "5px",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleRemoveImage(image.id)}
+                    >
+                      &#x2715;
+                    </button>
+                  </div>
                 ))}
-            </div>
+            </div> */}
           </DialogContentText>
         </DialogContent>
         <DialogActions style={{ alignSelf: "center", marginBottom: "15px" }}>
@@ -301,6 +418,7 @@ export default function ProductDialog() {
           </Button>
         </DialogActions>
       </Dialog>
+      <ToastContainer />
     </React.Fragment>
   );
 }

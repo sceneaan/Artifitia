@@ -7,7 +7,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import "../Home/home.css";
 import { addCategoryApi } from "../../api/categoryApi";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function CategoryDialog() {
@@ -39,7 +39,7 @@ export default function CategoryDialog() {
         });
       }
     } catch (error) {
-      toast.error("Category adding failed", {
+      toast.error("You need to sign in first", {
         position: toast.POSITION.BOTTOM_CENTER,
       });
       console.log(error.message);
@@ -88,6 +88,7 @@ export default function CategoryDialog() {
           </button>
         </DialogActions>
       </Dialog>
+      <ToastContainer />
     </React.Fragment>
   );
 }
