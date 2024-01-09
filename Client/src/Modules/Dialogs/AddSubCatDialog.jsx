@@ -68,6 +68,9 @@ export default function SubCategoryDialog() {
           toastId: "toast",
         });
         handleClose();
+        setTimeout(() => {
+            window.location.href = "/";
+          }, 1000);
       } else {
         toast.error(response.data.message, {
           position: toast.POSITION.BOTTOM_CENTER,

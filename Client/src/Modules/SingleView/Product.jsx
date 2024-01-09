@@ -227,6 +227,7 @@ const Product = () => {
                     >
                       <Grid item>
                         <EditProductDialog
+                          productId={productId}
                           productDetails={productDetails}
                           isEditing={isEditing}
                         />
@@ -299,6 +300,7 @@ const Product = () => {
             </Grid>
           </div>
         </div>
+        
       </div>
     </>
   );

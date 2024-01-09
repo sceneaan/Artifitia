@@ -34,7 +34,10 @@ export default function CategoryDialog() {
           toastId: "toast",
         });
         handleClose();
-      } 
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+      }
     } catch (error) {
       toast.error("You need to sign in first", {
         position: toast.POSITION.BOTTOM_CENTER,

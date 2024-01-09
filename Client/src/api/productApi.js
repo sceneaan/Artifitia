@@ -60,7 +60,12 @@ export const getSingleProductApi = async (productId) => {
 
 export const editProductApi = async (productId) => {
   try {
-    const response = await axios.get("/product/editproduct", productId);
+    const response = await axios.get("/product/editproduct", productId, {
+      headers: {
+        ...HEADER,
+        "Content-Type": "multipart/form-data",
+      },
+    });
     if (response.status === 200) {
       console.log(response.data);
     }

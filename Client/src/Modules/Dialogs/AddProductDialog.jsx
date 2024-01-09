@@ -161,6 +161,9 @@ export default function ProductDialog() {
           toastId: "toast",
         });
         handleClose();
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
       } else {
         toast.error(response.data.message || "Failed to add product", {
           position: toast.POSITION.BOTTOM_CENTER,

@@ -15,8 +15,9 @@ import { editProductApi, getSingleProductApi } from "../../api/productApi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
 
-export default function EditProductDialog({ productDetails }) {
+export default function EditProductDialog({ productId }) {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [product, setProduct] = useState({
@@ -25,56 +26,12 @@ export default function EditProductDialog({ productDetails }) {
     variants: [{ name: "", price: "", quantity: "" }],
     description: "",
   });
+
   const [images, setImages] = useState([]);
-  const [imageUrls, setImageUrls] = useState([]);
-
-  const handleRemoveImage = (id) => {
-    setImages((prevImages) => prevImages.filter((image) => image.id !== id));
-  };
-
-  const handleImageChange = (event) => {
-    const selectedImages = Array.from(event.target.files).slice(0, 3);
-
-    setImages((prevImages) => [
-      ...prevImages,
-      ...selectedImages.map((image, index) => ({
-        file: image,
-        id: index + Date.now(),
-      })),
-    ]);
-  };
 
   const [subCategory, setSubCategory] = useState([]);
-
   const [selectedFiles, setSelectedFiles] = useState([null, null, null]);
-
   const fileInputs = useRef([]);
-
-  const handleFileChange = (event, index) => {
-    const file = event.target.files[0];
-    setSelectedFiles((prevSelectedFiles) => {
-      const newSelectedFiles = [...prevSelectedFiles];
-      newSelectedFiles[index] = file;
-      return newSelectedFiles;
-    });
-  };
-
-  const handleRemove = (index) => {
-    setSelectedFiles((prevSelectedFiles) => {
-      const newSelectedFiles = [...prevSelectedFiles];
-      newSelectedFiles[index] = null;
-      return newSelectedFiles;
-    });
-  };
-
-  const handleDivClick = (index) => {
-    fileInputs.current[index].click();
-  };
-
-  const handleRemoveClick = (event, index) => {
-    event.stopPropagation();
-    handleRemove(index);
-  };
 
   useEffect(() => {
     const fetchSubCategories = async () => {
@@ -93,6 +50,23 @@ export default function EditProductDialog({ productDetails }) {
     fetchSubCategories();
   }, []);
 
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        const response = await getSingleProductApi(productId);
+
+        if (response.status === 200) {
+          setProduct(response.data.data);
+        } else {
+          console.error("Error fetching product details:", response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching product details:", error.message);
+      }
+    };
+
+    fetchProductDetails();
+  }, [productId]);
   const handleSubcategoryChange = (event) => {
     const subCategoryValue = event.target.value;
     setProduct((prev) => ({
@@ -138,6 +112,31 @@ export default function EditProductDialog({ productDetails }) {
       ...prev,
       variants: prev.variants.filter((_, i) => i !== index),
     }));
+  };
+
+  const handleDivClick = (index) => {
+    fileInputs.current[index].click();
+  };
+
+  const handleFileChange = (event, index) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const updatedSelectedFiles = [...selectedFiles];
+      updatedSelectedFiles[index] = file;
+      setSelectedFiles(updatedSelectedFiles);
+
+      const updatedImages = [...images];
+      updatedImages[index] = { url: URL.createObjectURL(file) };
+      setImages(updatedImages);
+    }
+  };
+
+  const handleRemoveClick = (event, index) => {
+    event.stopPropagation();
+    const updatedSelectedFiles = [...selectedFiles];
+    updatedSelectedFiles[index] = null;
+    setSelectedFiles(updatedSelectedFiles);
   };
 
   const handleAddProduct = async () => {
@@ -216,6 +215,7 @@ export default function EditProductDialog({ productDetails }) {
                 variant="outlined"
                 margin="normal"
                 style={{ width: "100%" }}
+                value={product.productName}
                 onChange={handleProductChange}
               />
             </div>
@@ -234,7 +234,7 @@ export default function EditProductDialog({ productDetails }) {
                   variant="outlined"
                   margin="normal"
                   style={{ width: "100px", marginRight: "10px" }}
-                  value={variant.name}
+                  value={product.productName}
                   onChange={(e) =>
                     handleVariantChange(index, "name", e.target.value)
                   }
@@ -315,6 +315,7 @@ export default function EditProductDialog({ productDetails }) {
                 variant="outlined"
                 margin="normal"
                 style={{ width: "100%" }}
+                value={product.description}
                 onChange={(e) =>
                   setProduct((prev) => ({
                     ...prev,
@@ -349,21 +350,28 @@ export default function EditProductDialog({ productDetails }) {
                     ref={(input) => (fileInputs.current[index] = input)}
                   />
 
-                  {selectedFiles[index] === null && (
-                    <p>
-                      <AddPhotoAlternateOutlinedIcon
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "30px",
-                        }}
+                  {/* Display the uploaded image if available */}
+                  {selectedFiles[index] === null ? (
+                    product.images && product.images[index] ? (
+                      <img
+                        src={product.images[index].url}
+                        alt={`Product Image ${index + 1}`}
+                        style={{ width: "120px", height: "120px" }}
                       />
-                    </p>
-                  )}
-                  {selectedFiles[index] && (
+                    ) : (
+                      <p>
+                        <AddPhotoAlternateOutlinedIcon
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "30px",
+                          }}
+                        />
+                      </p>
+                    )
+                  ) : (
                     <div style={{ position: "relative" }}>
-                      {" "}
                       <button
                         style={{ position: "absolute", right: "0", top: "0" }}
                         onClick={(event) => handleRemoveClick(event, index)}
