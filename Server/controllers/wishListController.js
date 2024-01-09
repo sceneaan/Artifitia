@@ -67,11 +67,11 @@ async function removeWishlist(req, res) {
 }
 
 async function listWishlist(req, res) {
-  const { adminId, productId } = req.query;
+  const { adminId } = req.body;
 
   try {
-    if (!adminId || adminId === "" || !productId || productId === "") {
-      return res.status(400).json({ message: "Invalid input data" });
+    if (!adminId || adminId === "") {
+      return res.status(400).json({ message: "Admin id not passed" });
     }
 
     const existingWishlist = await WishList.findOne({ adminId });
@@ -80,24 +80,33 @@ async function listWishlist(req, res) {
       return res.status(404).json({ message: "Wishlist not found" });
     }
 
-    if (!existingWishlist.productId.includes(productId)) {
-      return res.status(400).json({ message: "Product not in the wishlist" });
+    const productId = existingWishlist.productId;
+
+    const wishlistItems = [];
+
+    for (const id of productId) {
+      const productDetails = await Product.findOne({ _id: id });
+
+      if (!productDetails) {
+        return res.status(404).json({
+          message: `Product with ID ${id} not found in the wishlist`,
+        });
+      }
+
+      const firstImage =
+        productDetails.images.length > 0
+          ? `${process.env.FILEURL}${productDetails.images[0].url}`
+          : "/path/to/default-image.jpg";
+
+      wishlistItems.push({
+        productId: productDetails._id,
+        productName: productDetails.productName,
+        variants: productDetails.variants,
+        images: firstImage,
+      });
     }
 
-    const productDetails = await Product.findOne({ _id: productId });
-
-    if (!productDetails) {
-      return res.status(404).json({ message: "Product details not found" });
-    }
-
-    const wishlistItem = {
-      productId: productDetails._id,
-      productName: productDetails.productName,
-    };
-
-    res
-      .status(200)
-      .json({ message: "Wishlist item fetched successfully", wishlistItem });
+    res.status(200).json(wishlistItems);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
