@@ -4,6 +4,7 @@ import SignUp from "./Modules/Login/SignUp";
 import Home from "./Modules/Home/Home";
 import Product from "./Modules/SingleView/Product";
 import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/product/:productId" element={<Product />} />
         </Routes>
+        <ToastContainer/>
       </BrowserRouter>
     </>
   );

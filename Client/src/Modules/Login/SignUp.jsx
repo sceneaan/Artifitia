@@ -6,6 +6,8 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PermIdentityOutlinedIcon from "@mui/icons-material/PermIdentityOutlined";
 import { signUpApi } from "../../api/authApi";
 import { Link } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SignUp() {
   const [loginCred, setLoginCred] = useState({
@@ -13,6 +15,7 @@ export default function SignUp() {
     email: "",
     password: "",
   });
+
   const handleChangefunc = (e, key) => {
     const val = e.target.value;
     setLoginCred((prev) => ({
@@ -20,11 +23,40 @@ export default function SignUp() {
       [key]: val,
     }));
   };
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     if (loginCred.name && loginCred.password && loginCred.email) {
-      signUpApi(loginCred);
+      const response = await signUpApi(loginCred);
+      try {
+        if (response && response.status === 200) {
+          toast.success("Sign up successful! Please sign in.", {
+            position: toast.POSITION.BOTTOM_CENTER,
+          });
+          setTimeout(() => {
+            window.location.href = "/signin";
+          }, 1000);
+        } else {
+          console.log(response);
+          toast.error("Error signing up. Please try again.", {
+            position: toast.POSITION.BOTTOM_CENTER,
+            toastId: "toast",
+          });
+        }
+      } catch (error) {
+        console.error("error");
+        toast.error("Error signing up. Please try again.", {
+          position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
+        });
+      }
+    } else {
+      toast.error("Please provide all the required information.", {
+        position: toast.POSITION.BOTTOM_CENTER,
+        toastId: "toast",
+      });
     }
   };
+
   return (
     <div className="global-parent">
       <div className="login-right flex-column">
@@ -70,12 +102,11 @@ export default function SignUp() {
           />
         </div>
 
-        <Link to="/signin">
-          <button className="login-button" onClick={() => handleSubmit()}>
-            SIGN UP
-          </button>
-        </Link>
+        <button className="login-button" onClick={handleSubmit}>
+          SIGN UP
+        </button>
       </div>
+      <ToastContainer />
     </div>
   );
 }

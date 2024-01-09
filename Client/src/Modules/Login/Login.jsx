@@ -5,12 +5,15 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { signInApi } from "../../api/authApi";
 import { Link } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
   const [loginCred, setLoginCred] = useState({
     email: "",
     password: "",
   });
+
   const handleChangefunc = (e, key) => {
     const val = e.target.value;
     setLoginCred((prev) => ({
@@ -18,14 +21,35 @@ export default function Login() {
       [key]: val,
     }));
   };
-  const handleSubmit = () => {
-    console.log(loginCred);
+
+  const handleSubmit = async () => {
     if (loginCred.password && loginCred.email) {
-      signInApi(loginCred);
+      const response = await signInApi(loginCred);
+      try {
+        if (response.data.token) {
+          toast.success("Sign in successful", {
+            position: toast.POSITION.BOTTOM_CENTER,
+            toastId: "toast",
+          });
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 1000);
+        }
+        return response;
+      } catch (error) {
+        toast.error("Sign in failed", {
+          position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
+        });
+      }
+    } else {
+      toast.error("Please provide both email and password.", {
+        position: toast.POSITION.BOTTOM_CENTER,
+        toastId: "toast",
+      });
     }
   };
 
-  //
   return (
     <div className="global-parent">
       <div className="login-left flex-column">
@@ -57,8 +81,8 @@ export default function Login() {
         >
           Forgot Password?
         </a>
-        <Link to="/">
-          <button className="login-button" onClick={() => handleSubmit()}>
+        <Link>
+          <button className="login-button" onClick={handleSubmit}>
             SIGN IN
           </button>
         </Link>
@@ -72,6 +96,7 @@ export default function Login() {
           <button className="login-switch-button">SIGN UP</button>
         </Link>
       </div>
+      <ToastContainer />
     </div>
   );
 }
