@@ -65,16 +65,19 @@ export default function SubCategoryDialog() {
       if (response.status === 200) {
         toast.success(response.data.message, {
           position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
         });
         handleClose();
       } else {
         toast.error(response.data.message, {
           position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
         });
       }
     } catch (error) {
       toast.error("Subcategory adding failed", {
         position: toast.POSITION.BOTTOM_CENTER,
+        toastId: "toast",
       });
       console.log(error.message);
     }

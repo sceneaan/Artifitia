@@ -11,13 +11,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { listSubCategoryApi } from "../../api/subCategoryApi";
-import { addProductApi } from "../../api/productApi";
+import { editProductApi, getSingleProductApi } from "../../api/productApi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 
-export default function ProductDialog() {
+export default function EditProductDialog({ productDetails }) {
   const [open, setOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [product, setProduct] = useState({
     productName: "",
     subCategoryId: "",
@@ -178,9 +179,18 @@ export default function ProductDialog() {
 
   return (
     <React.Fragment>
-      <button className="button" variant="outlined" onClick={handleClickOpen}>
-        Add Product
-      </button>
+      <Button
+        variant="contained"
+        color="primary"
+        style={{
+          marginRight: "10px",
+          backgroundColor: "#EDA415",
+          borderRadius: "20px",
+        }}
+        onClick={handleClickOpen}
+      >
+        Edit Product
+      </Button>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -382,7 +392,7 @@ export default function ProductDialog() {
             }}
             onClick={handleAddProduct}
           >
-            ADD
+            EDIT
           </Button>
           <Button
             variant="contained"

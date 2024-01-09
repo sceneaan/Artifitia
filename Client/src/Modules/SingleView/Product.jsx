@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import TopBar from "../Topbar/Topbar";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
 import {
   Card,
@@ -19,7 +21,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
-
+import EditProductDialog from "../Dialogs/EditProductDialog";
 import { getSingleProductApi } from "../../api/productApi";
 import {
   addWishlistApi,
@@ -28,11 +30,13 @@ import {
 } from "../../api/wishlistApi";
 
 const Product = () => {
+  const token = localStorage.getItem("token");
   const { productId } = useParams();
   const [productDetails, setProductDetails] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [adminId, setAdminId] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchAdminId = () => {
@@ -71,6 +75,10 @@ const Product = () => {
     checkWishlistStatus();
   }, [productId]);
 
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
   const getTotalQuantity = () => {
     if (productDetails.variants) {
       return productDetails.variants.reduce(
@@ -87,10 +95,25 @@ const Product = () => {
 
   const handleWishlistClick = async () => {
     try {
+      if (!token) {
+        toast.error("You need to login first", {
+          position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
+        });
+        return;
+      }
       if (isInWishlist) {
         await removeWishlistApi(productId);
+        toast.success("Removed from wishlist", {
+          position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
+        });
       } else {
         await addWishlistApi(productId);
+        toast.success("Added to wishlist", {
+          position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
+        });
       }
       setIsInWishlist((prevIsInWishlist) => !prevIsInWishlist);
     } catch (error) {
@@ -203,18 +226,17 @@ const Product = () => {
                       alignItems="center"
                     >
                       <Grid item>
+                        <EditProductDialog
+                          productDetails={productDetails}
+                          isEditing={isEditing}
+                        />
+                      </Grid>
+                      <Grid item>
                         <Button
                           variant="contained"
-                          color="primary"
-                          style={{
-                            marginRight: "10px",
-                            backgroundColor: "#EDA415",
-                            borderRadius: "20px",
-                          }}
+                          color="secondary"
+                          style={{ borderRadius: "20px" }}
                         >
-                          Edit Product
-                        </Button>
-                        <Button variant="contained" color="secondary">
                           Buy Now
                         </Button>
                       </Grid>

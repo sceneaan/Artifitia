@@ -67,7 +67,7 @@ function TopBar({ onSearch }) {
       </div>
 
       <Drawer anchor="right" open={isDrawerOpen} onClose={handleDrawerClose}>
-        <WishListDrawer />
+        <WishListDrawer/>
       </Drawer>
     </div>
   );

@@ -31,16 +31,14 @@ export default function CategoryDialog() {
       if (response.status === 200) {
         toast.success(response.data.message, {
           position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
         });
         handleClose();
-      } else {
-        toast.error(response.data.message, {
-          position: toast.POSITION.BOTTOM_CENTER,
-        });
-      }
+      } 
     } catch (error) {
       toast.error("You need to sign in first", {
         position: toast.POSITION.BOTTOM_CENTER,
+        toastId: "toast",
       });
       console.log(error.message);
     }

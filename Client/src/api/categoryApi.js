@@ -11,7 +11,6 @@ const HEADER = {
   Authorization: "Bearer " + token,
 };
 
-//add category
 export const addCategoryApi = async (body) => {
   try {
     const response = await axios.post("/category/addcategory", body, {
@@ -26,7 +25,6 @@ export const addCategoryApi = async (body) => {
   }
 };
 
-//list category
 export const listCategoryApi = async (body) => {
   try {
     const response = await axios.post("/category/listcategories", body);

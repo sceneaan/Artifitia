@@ -34,7 +34,6 @@ export const addProductApi = async (body) => {
   }
 };
 
-//list products
 export const listProductApi = async (body) => {
   try {
     const response = await axios.post("/product/listproducts", body);
@@ -47,10 +46,21 @@ export const listProductApi = async (body) => {
   }
 };
 
-//product single view
 export const getSingleProductApi = async (productId) => {
   try {
     const response = await axios.get(`/product/getproduct/${productId}`);
+    if (response.status === 200) {
+      console.log(response.data);
+    }
+    return response;
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+export const editProductApi = async (productId) => {
+  try {
+    const response = await axios.get("/product/editproduct", productId);
     if (response.status === 200) {
       console.log(response.data);
     }
