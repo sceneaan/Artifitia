@@ -10,7 +10,7 @@ const productSchema = new mongoose.Schema({
   description: { type: String, required: true },
   variants: [
     {
-      spec: { name: { type: String }, value: { type: String } },
+      name: { type: String, required: true },
       quantity: { type: Number, required: true },
       price: { type: Number, required: true },
       symbol: { type: String, default: "$" },
