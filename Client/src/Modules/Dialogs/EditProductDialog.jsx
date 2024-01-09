@@ -15,20 +15,16 @@ import { editProductApi, getSingleProductApi } from "../../api/productApi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
-import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
 
 export default function EditProductDialog({ productId }) {
   const [open, setOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [product, setProduct] = useState({
     productName: "",
     subCategoryId: "",
     variants: [{ name: "", price: "", quantity: "" }],
     description: "",
   });
-
   const [images, setImages] = useState([]);
-
   const [subCategory, setSubCategory] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([null, null, null]);
   const fileInputs = useRef([]);
@@ -139,7 +135,7 @@ export default function EditProductDialog({ productId }) {
     setSelectedFiles(updatedSelectedFiles);
   };
 
-  const handleAddProduct = async () => {
+  const handleEditProduct = async () => {
     try {
       const formData = new FormData();
       formData.append("productName", product.productName);
@@ -149,11 +145,11 @@ export default function EditProductDialog({ productId }) {
 
       selectedFiles.forEach((file, index) => {
         if (file !== null) {
-          formData.append("images", file);
+          formData.append(`images[${index}]`, file); 
         }
       });
 
-      const response = await addProductApi(formData);
+      const response = await editProductApi(productId, formData);
 
       if (response.status === 200) {
         toast.success(response.data.message, {
@@ -162,13 +158,13 @@ export default function EditProductDialog({ productId }) {
         });
         handleClose();
       } else {
-        toast.error(response.data.message || "Failed to add product", {
+        toast.error(response.data.message || "Failed to edit product", {
           position: toast.POSITION.BOTTOM_CENTER,
           toastId: "toast",
         });
       }
     } catch (error) {
-      toast.error(response.data.message || "Failed to add product", {
+      toast.error(error.message || "Failed to edit product", {
         position: toast.POSITION.BOTTOM_CENTER,
         toastId: "toast",
       });
@@ -234,7 +230,7 @@ export default function EditProductDialog({ productId }) {
                   variant="outlined"
                   margin="normal"
                   style={{ width: "100px", marginRight: "10px" }}
-                  value={product.productName}
+                  value={product.variants[index].name}
                   onChange={(e) =>
                     handleVariantChange(index, "name", e.target.value)
                   }
@@ -398,7 +394,7 @@ export default function EditProductDialog({ productId }) {
               backgroundColor: "#EDA415",
               borderRadius: "20px",
             }}
-            onClick={handleAddProduct}
+            onClick={handleEditProduct}
           >
             EDIT
           </Button>
