@@ -23,8 +23,8 @@ export default function EditProductDialog({ productId }) {
     subCategoryId: "",
     variants: [{ name: "", price: "", quantity: "" }],
     description: "",
+    images: [],
   });
-  const [images, setImages] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([null, null, null]);
   const fileInputs = useRef([]);
@@ -63,6 +63,7 @@ export default function EditProductDialog({ productId }) {
 
     fetchProductDetails();
   }, [productId]);
+
   const handleSubcategoryChange = (event) => {
     const subCategoryValue = event.target.value;
     setProduct((prev) => ({
@@ -122,22 +123,32 @@ export default function EditProductDialog({ productId }) {
       updatedSelectedFiles[index] = file;
       setSelectedFiles(updatedSelectedFiles);
 
-      const updatedImages = [...images];
+      const updatedImages = [...product.images];
       updatedImages[index] = { url: URL.createObjectURL(file) };
-      setImages(updatedImages);
+      setProduct((prev) => ({
+        ...prev,
+        images: updatedImages,
+      }));
     }
   };
 
-  const handleRemoveClick = (event, index) => {
-    event.stopPropagation();
+  const handleRemoveClick = (index) => {
     const updatedSelectedFiles = [...selectedFiles];
     updatedSelectedFiles[index] = null;
     setSelectedFiles(updatedSelectedFiles);
+
+    const updatedImages = [...product.images];
+    updatedImages[index] = null;
+    setProduct((prev) => ({
+      ...prev,
+      images: updatedImages,
+    }));
   };
 
   const handleEditProduct = async () => {
     try {
       const formData = new FormData();
+      formData.append("productId", product._id);
       formData.append("productName", product.productName);
       formData.append("subCategoryId", product.subCategoryId);
       formData.append("description", product.description);
@@ -145,7 +156,7 @@ export default function EditProductDialog({ productId }) {
 
       selectedFiles.forEach((file, index) => {
         if (file !== null) {
-          formData.append(`images[${index}]`, file); 
+          formData.append(`images`, file);
         }
       });
 
@@ -157,6 +168,9 @@ export default function EditProductDialog({ productId }) {
           toastId: "toast",
         });
         handleClose();
+        setTimeout(() => {
+          window.location.href = `/product/${productId}`;
+        }, 1000);
       } else {
         toast.error(response.data.message || "Failed to edit product", {
           position: toast.POSITION.BOTTOM_CENTER,
@@ -195,7 +209,7 @@ export default function EditProductDialog({ productId }) {
         fullWidth
       >
         <DialogTitle style={{ alignSelf: "center" }} id="alert-dialog-title">
-          {"Add Product"}
+          {"Edit Product"}
         </DialogTitle>
         <DialogContent
           style={{
@@ -346,7 +360,6 @@ export default function EditProductDialog({ productId }) {
                     ref={(input) => (fileInputs.current[index] = input)}
                   />
 
-                  {/* Display the uploaded image if available */}
                   {selectedFiles[index] === null ? (
                     product.images && product.images[index] ? (
                       <img

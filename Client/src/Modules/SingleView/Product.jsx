@@ -22,7 +22,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import EditProductDialog from "../Dialogs/EditProductDialog";
-import { getSingleProductApi } from "../../api/productApi";
+import { getSingleProductApi, editProductApi } from "../../api/productApi";
 import {
   addWishlistApi,
   removeWishlistApi,
@@ -37,6 +37,9 @@ const Product = () => {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [adminId, setAdminId] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [product, setProduct] = useState({
+    rating: [{ value: 2 }],
+  });
 
   useEffect(() => {
     const fetchAdminId = () => {
@@ -74,6 +77,41 @@ const Product = () => {
     fetchProductDetails();
     checkWishlistStatus();
   }, [productId]);
+
+  const handleRateProduct = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("productId", productId);
+      formData.append("rating", product.rating[0].value);
+
+      const response = await editProductApi(productId, formData);
+
+      if (response.status === 200) {
+        toast.success(response.data.message, {
+          position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
+        });
+        setProduct((prevProduct) => ({
+          ...prevProduct,
+          rating: [{ value: newValue }],
+        }));
+        // setTimeout(() => {
+        //   window.location.href = `/product/${productId}`;
+        // }, 1000);
+      } else {
+        toast.error(response.data.message || "Failed to rate the product", {
+          position: toast.POSITION.BOTTOM_CENTER,
+          toastId: "toast",
+        });
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to rate the product", {
+        position: toast.POSITION.BOTTOM_CENTER,
+        toastId: "toast",
+      });
+      console.error(error.message);
+    }
+  };
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -195,9 +233,12 @@ const Product = () => {
                       </Typography>
                     )}
                     <Rating
-                      name="read-only"
-                      value={productDetails.rating || 0}
-                      readOnly
+                      name="simple-controlled"
+                      value={product.rating[0].value}
+                      onChange={(event, newValue) =>
+                        handleRateProduct(newValue)
+                      }
+                      // onClick={handleRateProduct}
                     />
                     <Divider style={{ margin: "20px 0" }} />
                     <Typography variant="body1" paragraph>
@@ -300,7 +341,6 @@ const Product = () => {
             </Grid>
           </div>
         </div>
-        
       </div>
     </>
   );

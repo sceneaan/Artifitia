@@ -144,11 +144,11 @@ const Home = () => {
                               {product.productName}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              <b>${product.variants[0].price}</b>
+                              <b>$ {product.variants[0].price}</b>
                             </Typography>
                             <Rating
                               name="read-only"
-                              value={product.rating}
+                              value={product.totalRating}
                               readOnly
                             />
                           </CardContent>
