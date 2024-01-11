@@ -1,8 +1,8 @@
 const { Product } = require("../models/productModel");
+const jwt = require("jsonwebtoken");
 
 async function addProduct(req, res) {
   try {
-    console.log(req.body)
     const { productName, subCategoryId, description, variants, rating } =
       req.body;
 
@@ -10,12 +10,22 @@ async function addProduct(req, res) {
       ? req.files.map((file) => ({ url: file.path }))
       : [];
 
+    const token = req.headers.authorization.split(" ")[1];
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const emailFromToken = decodedToken.email;
+
     const newProduct = new Product({
       productName,
       subCategoryId,
       description,
       variants: JSON.parse(variants),
-      rating,
+      rating: [
+        {
+          value: rating,
+          email: emailFromToken,
+        },
+      ],
+      totalRating: rating,
       images: req.files?.map((file) => ({ url: file.path })) || [],
     });
 
@@ -39,26 +49,64 @@ async function editProduct(req, res) {
       rating,
     } = req.body;
 
+    const images = req.files
+      ? req.files.map((file) => ({ url: file.path }))
+      : [];
+
     const existingProduct = await Product.findById(productId);
 
     if (!existingProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    const token = req.headers.authorization.split(" ")[1];
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const emailFromToken = decodedToken.email;
+
     existingProduct.productName = productName || existingProduct.productName;
     existingProduct.subCategoryId =
       subCategoryId || existingProduct.subCategoryId;
     existingProduct.description = description || existingProduct.description;
-    existingProduct.variants = variants || existingProduct.variants;
 
-    if (rating !== undefined) {
-      existingProduct.rating.push(rating);
+    if (variants) {
+      JSON.parse(variants).forEach((newVariant) => {
+        const existingVariant = existingProduct.variants.find(
+          (v) => v._id.toString() === newVariant._id.$oid
+        );
 
-      const totalRating = existingProduct.rating.reduce((sum, r) => sum + r, 0);
-      const averageRating = totalRating / existingProduct.rating.length;
-
-      existingProduct.rating = averageRating;
+        if (existingVariant) {
+          existingVariant.name = newVariant.name;
+          existingVariant.quantity = newVariant.quantity;
+          existingVariant.price = newVariant.price;
+          existingVariant.symbol = newVariant.symbol;
+        }
+      });
     }
+
+    const existingRatingIndex = existingProduct.rating.findIndex(
+      (r) => r.email === emailFromToken
+    );
+
+    if (existingRatingIndex !== -1) {
+      existingProduct.rating[existingRatingIndex].value = rating;
+    } else {
+      const newRating = {
+        value: rating,
+        email: emailFromToken,
+      };
+      existingProduct.rating.push(newRating);
+    }
+
+    const totalRating = existingProduct.rating.reduce(
+      (sum, r) => sum + r.value,
+      0
+    );
+
+    // Update the totalRating directly with the average rating
+    existingProduct.totalRating = totalRating / (existingProduct.rating.length || 1);
+
+    existingProduct.images =
+      req.files?.map((file) => ({ url: file.path })) || [];
 
     await existingProduct.save();
 
@@ -68,6 +116,7 @@ async function editProduct(req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
 
 async function deleteProduct(req, res) {
   try {

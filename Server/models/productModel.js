@@ -17,7 +17,13 @@ const productSchema = new mongoose.Schema({
     },
   ],
   images: { type: [imageSchema] },
-  rating: { type: Number, min: 0, max: 5, default: 0 },
+  rating: [
+    {
+      value: { type: Number, min: 0, max: 5 },
+      email: { type: String },
+    },
+  ],
+  totalRating: { type: Number },
 });
 
 const Product = mongoose.model("Product", productSchema);
