@@ -13,7 +13,7 @@ import "./home.css";
 import { listProductApi } from "../../api/productApi";
 
 const Home = () => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
   const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
   const [openSubCategoryDialog, setOpenSubCategoryDialog] = useState(false);
   const [openProductDialog, setOpenProductDialog] = useState(false);
@@ -161,7 +161,7 @@ const Home = () => {
                 <div className="pagination-container">
                   <Pagination
                     count={totalPages}
-                    color="primary"
+                    color="warning"
                     page={currentPage}
                     onChange={handlePageChange}
                     className="pagination"

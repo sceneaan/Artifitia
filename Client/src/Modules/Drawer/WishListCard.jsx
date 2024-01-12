@@ -21,7 +21,6 @@ const WishListCard = ({ productId }) => {
 
         if (response.status === 200) {
           setProductDetails(response.data);
-          console.log("Product Name:", response.data[0]?.productName);
         } else {
           console.error("Error fetching wishlist item details:", response);
         }
@@ -62,11 +61,11 @@ const WishListCard = ({ productId }) => {
                   ? `${productDetails[0].variants[0]?.symbol || "-"}${
                       productDetails[0].variants[0]?.price || "-"
                     }`
-                  : "-"}
+                  : "-"
+              }
               `}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              
               <Rating
                 name="read-only"
                 value={!loading ? productDetails[0]?.rating || 0 : 0}

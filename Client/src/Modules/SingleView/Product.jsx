@@ -37,9 +37,7 @@ const Product = () => {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [adminId, setAdminId] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [product, setProduct] = useState({
-    rating: [{ value: 2 }],
-  });
+  const [product, setProduct] = useState(null);
 
   useEffect(() => {
     const fetchAdminId = () => {
@@ -57,6 +55,7 @@ const Product = () => {
 
         if (response.status === 200) {
           setProductDetails(response.data.data);
+          setProduct(response.data.data.totalRating);
         } else {
           console.error("Error fetching product details:", response.data);
         }
@@ -78,39 +77,40 @@ const Product = () => {
     checkWishlistStatus();
   }, [productId]);
 
-  const handleRateProduct = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("productId", productId);
-      formData.append("rating", product.rating[0].value);
+  const ratingOnChange = (e, newValue) => {
+    setProduct(newValue);
+    const handleRateProduct = async () => {
+      try {
+        const formData = new FormData();
+        formData.append("productId", productId);
+        formData.append("rating", newValue === null ? 0 : newValue);
 
-      const response = await editProductApi(productId, formData);
+        const response = await editProductApi(formData);
 
-      if (response.status === 200) {
-        toast.success(response.data.message, {
+        if (response.status === 200) {
+          toast.success(response.data.message, {
+            position: toast.POSITION.BOTTOM_CENTER,
+            toastId: "toast",
+          });
+
+          setTimeout(() => {
+            window.location.href = `/product/${productId}`;
+          }, 1000);
+        } else {
+          toast.error("You need to sign in first", {
+            position: toast.POSITION.BOTTOM_CENTER,
+            toastId: "toast",
+          });
+        }
+      } catch (error) {
+        toast.error(error.message || "Failed to rate the product", {
           position: toast.POSITION.BOTTOM_CENTER,
           toastId: "toast",
         });
-        setProduct((prevProduct) => ({
-          ...prevProduct,
-          rating: [{ value: newValue }],
-        }));
-        // setTimeout(() => {
-        //   window.location.href = `/product/${productId}`;
-        // }, 1000);
-      } else {
-        toast.error(response.data.message || "Failed to rate the product", {
-          position: toast.POSITION.BOTTOM_CENTER,
-          toastId: "toast",
-        });
+        console.error(error.message);
       }
-    } catch (error) {
-      toast.error(error.message || "Failed to rate the product", {
-        position: toast.POSITION.BOTTOM_CENTER,
-        toastId: "toast",
-      });
-      console.error(error.message);
-    }
+    };
+    handleRateProduct();
   };
 
   const handleEditClick = () => {
@@ -234,15 +234,28 @@ const Product = () => {
                     )}
                     <Rating
                       name="simple-controlled"
-                      value={product.rating[0].value}
-                      onChange={(event, newValue) =>
-                        handleRateProduct(newValue)
-                      }
+                      value={product}
+                      onChange={ratingOnChange}
                       // onClick={handleRateProduct}
                     />
                     <Divider style={{ margin: "20px 0" }} />
                     <Typography variant="body1" paragraph>
                       {productDetails.description}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" paragraph>
+                      Spec:{" "}
+                      {productDetails.variants &&
+                        productDetails.variants.map((variant) => (
+                          <Button
+                            key={variant._id}
+                            variant="contained"
+                            color="primary"
+                            style={{ marginRight: "10px" }}
+                            onClick={() => handleVariantSelect(variant)}
+                          >
+                            {variant.name}
+                          </Button>
+                        ))}
                     </Typography>
                     <Typography variant="body2" color="textSecondary" paragraph>
                       Quantity:{" "}

@@ -5,14 +5,28 @@ import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlin
 import Drawer from "@mui/material/Drawer";
 import { Link } from "react-router-dom";
 import WishListDrawer from "../Drawer/WishListDrawer";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
 
 function TopBar({ onSearch }) {
   const token = localStorage.getItem("token");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleSignOut = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("adminId");
+    toast.success("You have signed out!", {
+      position: toast.POSITION.BOTTOM_CENTER,
+      autoClose: 1000,
+      onClose: () => {
+        setTimeout(() => {
+          window.location.href = "/signin";
+        }, 1000);
+      },
+    });
   };
 
   const handleSearchChange = (event) => {
@@ -67,7 +81,7 @@ function TopBar({ onSearch }) {
       </div>
 
       <Drawer anchor="right" open={isDrawerOpen} onClose={handleDrawerClose}>
-        <WishListDrawer/>
+        <WishListDrawer />
       </Drawer>
     </div>
   );

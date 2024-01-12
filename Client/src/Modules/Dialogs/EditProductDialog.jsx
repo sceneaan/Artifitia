@@ -160,7 +160,7 @@ export default function EditProductDialog({ productId }) {
         }
       });
 
-      const response = await editProductApi(productId, formData);
+      const response = await editProductApi(formData);
 
       if (response.status === 200) {
         toast.success(response.data.message, {
@@ -178,7 +178,7 @@ export default function EditProductDialog({ productId }) {
         });
       }
     } catch (error) {
-      toast.error(error.message || "Failed to edit product", {
+      toast.error("Failed to edit product", {
         position: toast.POSITION.BOTTOM_CENTER,
         toastId: "toast",
       });

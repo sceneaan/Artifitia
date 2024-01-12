@@ -11,7 +11,6 @@ const HEADER = {
   Authorization: "Bearer " + token,
 };
 
-//add product
 export const addProductApi = async (body) => {
   try {
     const response = await axios.post(
@@ -58,18 +57,14 @@ export const getSingleProductApi = async (productId) => {
   }
 };
 
-export const editProductApi = async (productId, formData) => {
+export const editProductApi = async (formData) => {
   try {
-    const response = await axios.post(
-      "/product/editproduct",
-      formData,
-      {
-        headers: {
-          ...HEADER,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const response = await axios.post("/product/editproduct", formData, {
+      headers: {
+        ...HEADER,
+        "Content-Type": "multipart/form-data",
+      },
+    });
     if (response.status === 200) {
       console.log(response.data);
     }
