@@ -49,10 +49,6 @@ async function editProduct(req, res) {
       rating,
     } = req.body;
 
-    const images = req.files
-      ? req.files.map((file) => ({ url: file.path }))
-      : [];
-
     const existingProduct = await Product.findById(productId);
 
     if (!existingProduct) {
@@ -83,27 +79,29 @@ async function editProduct(req, res) {
       });
     }
 
-    const existingRatingIndex = existingProduct.rating.findIndex(
-      (r) => r.email === emailFromToken
-    );
+    if (rating !== undefined && rating !== null) {
+      const existingRatingIndex = existingProduct.rating.findIndex(
+        (r) => r.email === emailFromToken
+      );
 
-    if (existingRatingIndex !== -1) {
-      existingProduct.rating[existingRatingIndex].value = rating;
-    } else {
-      const newRating = {
-        value: rating,
-        email: emailFromToken,
-      };
-      existingProduct.rating.push(newRating);
+      if (existingRatingIndex !== -1) {
+        existingProduct.rating[existingRatingIndex].value = rating;
+      } else {
+        const newRating = {
+          value: rating,
+          email: emailFromToken,
+        };
+        existingProduct.rating.push(newRating);
+      }
+
+      const totalRating = existingProduct.rating.reduce(
+        (sum, r) => sum + r.value,
+        0
+      );
+
+      existingProduct.totalRating =
+        totalRating / Math.max(1, existingProduct.rating.length);
     }
-
-    const totalRating = existingProduct.rating.reduce(
-      (sum, r) => sum + r.value,
-      0
-    );
-
-    // Update the totalRating directly with the average rating
-    existingProduct.totalRating = totalRating / (existingProduct.rating.length || 1);
 
     existingProduct.images =
       req.files?.map((file) => ({ url: file.path })) || [];
@@ -116,7 +114,6 @@ async function editProduct(req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
-
 
 async function deleteProduct(req, res) {
   try {
