@@ -53,9 +53,18 @@ export const removeWishlistApi = async (productId) => {
   }
 };
 
-export const listWishListApi = async (body) => {
+export const listWishListApi = async (productId) => {
   try {
-    const response = await axios.post("/wishlist/listwishlists", body);
+    const response = await axios.post(
+      "/wishlist/listwishlists",
+      {
+        productId,
+        adminId,
+      },
+      {
+        headers: HEADER,
+      }
+    );
     if (response.status === 200) {
       store.dispatch(setWishLists(response.data));
     }

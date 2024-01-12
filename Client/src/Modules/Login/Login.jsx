@@ -86,6 +86,14 @@ export default function Login() {
             SIGN IN
           </button>
         </Link>
+        <Link to="/">
+          <button
+            className="login-button"
+            style={{ backgroundColor: "#003f62" }}
+          >
+            RETURN TO HOME
+          </button>
+        </Link>
       </div>
       <div className="login-right flex-column">
         <h2>Hello Friend!</h2>

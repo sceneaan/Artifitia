@@ -105,6 +105,14 @@ export default function SignUp() {
         <button className="login-button" onClick={handleSubmit}>
           SIGN UP
         </button>
+        <Link to="/">
+          <button
+            className="login-button"
+            style={{ backgroundColor: "#003f62" }}
+          >
+            RETURN TO HOME
+          </button>
+        </Link>
       </div>
       <ToastContainer />
     </div>
